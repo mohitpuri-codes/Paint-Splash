@@ -1,10 +1,9 @@
-import { ChangeEvent, Fragment, useState, MouseEvent } from "react";
+import { Fragment, useState, MouseEvent, useRef } from "react";
 import DrawOrErase from "./components/DrawOrErase";
 import { createGrid } from "./utils";
-import { MOUSE_CLICK } from "./constants";
+import { ERASED_COLOR, MOUSE_CLICK } from "./constants";
 
 function App() {
-  const [defaultColor] = useState("#ffffff");
   const [color, setColor] = useState("#ffffff");
   const [drawOrErase] = useState(true);
   const [initialGrid, setInitialGrid] = useState(createGrid(color));
@@ -14,18 +13,18 @@ function App() {
   const [mouseButton, setMouseButton] = useState<
     MOUSE_CLICK.LeftClick | MOUSE_CLICK.RightClick | null
   >(null);
-
-  function handleColorChange(e: ChangeEvent<HTMLInputElement>) {
-    setColor(e.target.value);
-  }
+  const primaryColorRef = useRef<HTMLInputElement>(null);
+  const secondaryColorRef = useRef<HTMLInputElement>(null);
 
   // throttled and debounce
-
-  // appply on btn
+  // or
+  // appply on btn - to grab the input color
+  // refer 2 arry
   function handleDraw() {
     setCanDraw(true);
   }
 
+  // TODO: Add enums
   function handleMouseDown(e: MouseEvent<HTMLButtonElement>) {
     if (e.button === MOUSE_CLICK.RightClick) {
       setMouseButton(MOUSE_CLICK.RightClick);
@@ -50,7 +49,7 @@ function App() {
     } else if (!canDraw && mouseClick) {
       setInitialGrid((prevGrid) => {
         const newGrid = prevGrid.map((row) => [...row]);
-        newGrid[row][col] = defaultColor;
+        newGrid[row][col] = ERASED_COLOR;
         return newGrid;
       });
     }
@@ -58,10 +57,6 @@ function App() {
 
   function handleErase() {
     setCanDraw(false);
-  }
-
-  function handleRightClickColorChange(e: ChangeEvent<HTMLInputElement>) {
-    setRightClickColor(e.target.value);
   }
 
   function handleClick(
@@ -75,6 +70,11 @@ function App() {
       return newGrid;
     });
     console.log(e.button);
+  }
+  // TODO: apply color on button click
+  function handleInputColor() {
+    setColor(primaryColorRef.current!.value);
+    setRightClickColor(secondaryColorRef.current!.value);
   }
 
   return (
@@ -102,10 +102,10 @@ function App() {
         ))}
       </div>
 
-      <p>Color: {color}</p>
       <div className="user-selection">
-        <input type="color" onChange={handleColorChange} value={color} />
-        <input type="color" onChange={handleRightClickColorChange} />
+        <input type="color" ref={primaryColorRef} defaultValue={"#3700ff"} />
+        <input type="color" ref={secondaryColorRef} />
+        <button onClick={handleInputColor}>Apply the color</button>
         <div>
           <DrawOrErase
             title={canDraw ? "Erase" : "Draw"}

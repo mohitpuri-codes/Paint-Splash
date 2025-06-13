@@ -5,3 +5,5 @@ export enum MOUSE_CLICK {
   LeftClick = 1,
   RightClick = 2,
 }
+
+export const ERASED_COLOR = "#ffffff";
